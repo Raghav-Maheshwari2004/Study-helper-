@@ -24,3 +24,58 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* --- DARK THEME OVERRIDES --- */
+.dark body {
+  @apply bg-gray-900 text-white;
+}
+.dark nav {
+  @apply bg-gray-900 border-gray-800 text-white;
+}
+.dark .bg-white {
+  @apply bg-gray-800 border-gray-700 text-white;
+}
+.dark .text-gray-900 {
+  @apply text-white;
+}
+.dark .text-gray-500, .dark .text-gray-600 {
+  @apply text-gray-400;
+}
+
+/* --- TECH / HACKER THEME OVERRIDES --- */
+.tech body {
+  background-color: #050505; /* Pitch Black */
+  color: #00f3ff; /* Cyan/Neon Blue */
+  font-family: 'Courier New', Courier, monospace; /* Monospace font */
+}
+
+/* Override Navbar */
+.tech nav {
+  background-color: #000000;
+  border-bottom: 1px solid #00f3ff;
+}
+
+/* Override Cards */
+.tech .bg-white, .tech .bg-gray-50 {
+  background-color: #0a0a0a;
+  border: 1px solid #00f3ff; /* Neon borders */
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+  color: #00f3ff;
+}
+
+/* Override Text */
+.tech h1, .tech h2, .tech h3, .tech p, .tech span, .tech div {
+  color: #00f3ff !important;
+  text-shadow: 0 0 2px rgba(0, 243, 255, 0.5); /* Slight glow */
+}
+
+/* Override Buttons */
+.tech button {
+  border: 1px solid #00f3ff;
+  background: transparent;
+  color: #00f3ff;
+  border-radius: 0; /* Sharp edges */
+}
+.tech button:hover {
+  background: #00f3ff;
+  color: #000;
+}
