@@ -8,7 +8,7 @@ type Theme = "light" | "dark" | "tech";
 // 2. Define what the Context provides
 interface ThemeContextType {
   theme: Theme;
-  setTheme: (theme: Theme) => voi;
+  setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
