@@ -4,7 +4,7 @@ import "./globals.css";
 // 👇 NOTICE THE CURLY BRACES { } HERE!
 import { ThemeProvider } from "./context/ThemeContext"; 
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "StudySync - AI Powered Study Planner",
