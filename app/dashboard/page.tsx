@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus, BookOpen, Calendar, Clock, Trash2, Loader2 } from "lucide-react";
 import dynamic from 'next/dynamic';
+import Link from "next/link"; // <--- ADDED THIS IMPORT
 import AddSubjectModal from "../components/AddSubjectModal";
 
 // Dynamically import the Navbar to avoid SSR issues with theme
@@ -45,6 +46,7 @@ function DashboardContent() {
     fetchSubjects();
   }, []);
 
+  // Parallax Effect
   useEffect(() => {
     const far = bgFarRef.current;
     const near = bgNearRef.current;
@@ -71,16 +73,13 @@ function DashboardContent() {
     };
   }, []);
 
-  // --- 2. DELETE FUNCTION (Bonus Feature) ---
+  // --- 2. DELETE FUNCTION ---
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this subject?")) return;
     setDeletingId(id);
     try {
-      // We will need to add a DELETE handler in the API later, 
-      // for now, let's just update the UI locally to hide it.
-      // await fetch(`/api/subjects?id=${id}`, { method: "DELETE" }); 
-      
-      // Temporary: Just remove from screen
+      // Temporary: Just remove from screen locally for now
+      // Later you will implement the API call: await fetch(`/api/subjects?id=${id}`, { method: "DELETE" }); 
       setSubjects(prev => prev.filter(sub => sub._id !== id));
     } catch (error) {
       alert("Failed to delete");
@@ -153,9 +152,11 @@ function DashboardContent() {
             /* Subjects Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {subjects.map((subject) => (
-                <div 
+                // 👇 THIS IS THE KEY CHANGE: WRAPPED IN LINK
+                <Link 
+                  href={`/subject/${subject._id}`}
                   key={subject._id} 
-                  className="card group relative p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  className="card group relative p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block"
                 >
                   {/* Card Header */}
                   <div className="flex justify-between items-start mb-4">
@@ -165,7 +166,11 @@ function DashboardContent() {
                     
                     {/* Delete Button */}
                     <button 
-                      onClick={() => handleDelete(subject._id)}
+                      onClick={(e) => {
+                        e.preventDefault(); // Stop Link from working when clicking delete
+                        e.stopPropagation();
+                        handleDelete(subject._id);
+                      }}
                       className="opacity-0 group-hover:opacity-100 p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                       title="Delete Subject"
                     >
@@ -185,7 +190,7 @@ function DashboardContent() {
                       <span>{new Date(subject.examDate).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
                     </div>
 
-                    {/* Syllabus Box - Fixed Contrast */}
+                    {/* Syllabus Box */}
                     <div className="flex items-start gap-2 p-3 rounded-lg text-sm leading-relaxed bg-black/5 dark:bg-white/5 text-gray-900/80 dark:text-gray-200 border border-black/5 dark:border-white/10">
                       <Clock className="w-4 h-4 mt-0.5 shrink-0 opacity-50" />
                       <span className="line-clamp-2">
@@ -193,7 +198,7 @@ function DashboardContent() {
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
