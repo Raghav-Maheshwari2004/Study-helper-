@@ -6,9 +6,9 @@ import Navbar from "@/app/components/Navbar";
 import { ArrowLeft, FileText, ExternalLink, Loader2, CheckCircle, BookOpen, Sparkles } from "lucide-react";
 import { UploadButton } from "@/app/utils/uploadthing"; 
 import GeneratePlanModal from "@/app/components/GeneratePlanModal"; 
-import SummaryModal from "@/app/components/SummaryModal"; // <--- RESTORED IMPORT
+import SummaryModal from "@/app/components/SummaryModal"; // Import our new UI-only modal
 
-// --- 1. INTERFACES ---
+// Interfaces
 interface Material {
   fileName: string;
   fileUrl: string;
@@ -30,7 +30,6 @@ interface PlanDay {
   focus: string;
 }
 
-// --- 2. COMPONENT ---
 export default function SubjectDetails() {
   const { id } = useParams();
   const router = useRouter();
@@ -39,16 +38,13 @@ export default function SubjectDetails() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("materials");
 
-  // --- STATES FOR MODALS ---
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  // --- MODAL STATES ---
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false); // Controls the Summary Popup
   
-  // State for Summary Modal
-  const [summaryFile, setSummaryFile] = useState<Material | null>(null); // <--- TRACKS SELECTED FILE
-
+  const [generating, setGenerating] = useState(false);
   const [timetableData, setTimetableData] = useState<PlanDay[]>([]); 
 
-  // --- 3. FETCH DATA ---
   useEffect(() => {
     const fetchSubject = async () => {
       try {
@@ -57,16 +53,13 @@ export default function SubjectDetails() {
           const data = await res.json();
           setSubject(data);
         }
-      } catch (err) {
-        console.error("Failed to load subject", err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error(err); } 
+      finally { setLoading(false); }
     };
     if (id) fetchSubject();
   }, [id]);
 
-  // --- 4. GENERATE PLAN HANDLER ---
+  // (Keeping your existing Plan Logic)
   const handleGeneratePlan = async (hours: number, difficulty: string) => {
     setGenerating(true);
     try {
@@ -82,14 +75,13 @@ export default function SubjectDetails() {
         })
       });
 
-      if (!res.ok) throw new Error("Failed to generate");
+      if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setTimetableData(data.plan); 
       setActiveTab("timetable"); 
-      setIsModalOpen(false);
+      setIsPlanModalOpen(false);
     } catch (error) {
-      console.error(error);
-      alert("Error generating plan. Please try again.");
+      alert("Error generating plan.");
     } finally {
       setGenerating(false);
     }
@@ -118,12 +110,23 @@ export default function SubjectDetails() {
               </p>
             </div>
             
-            <button 
-              onClick={() => setIsModalOpen(true)} 
-              className="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition shadow-lg hover:shadow-xl"
-            >
-              Generate New Plan
-            </button>
+            <div className="flex gap-3">
+              {/* --- NEW BUTTON: OPEN SUMMARY MODAL --- */}
+              <button 
+                onClick={() => setIsSummaryModalOpen(true)}
+                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center gap-2 shadow-sm"
+              >
+                <Sparkles className="w-4 h-4 text-purple-600" />
+                AI Summary
+              </button>
+
+              <button 
+                onClick={() => setIsPlanModalOpen(true)} 
+                className="bg-black text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition shadow-lg hover:shadow-xl"
+              >
+                Generate New Plan
+              </button>
+            </div>
           </div>
         </div>
 
@@ -140,7 +143,6 @@ export default function SubjectDetails() {
         {/* CONTENT */}
         {activeTab === "materials" ? (
           <div className="space-y-6">
-            {/* UPLOAD BOX */}
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center bg-white hover:bg-gray-50 transition">
               <UploadButton
                 endpoint="subjectResources"
@@ -157,7 +159,6 @@ export default function SubjectDetails() {
               />
             </div>
 
-            {/* FILE LIST */}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
               <div className="p-4 border-b border-gray-100 bg-gray-50"><h3 className="font-semibold text-gray-700">Uploaded Files ({subject.materials?.length || 0})</h3></div>
               <div className="divide-y divide-gray-100">
@@ -166,7 +167,6 @@ export default function SubjectDetails() {
                 ) : (
                   subject.materials.map((file, idx) => (
                     <div key={idx} className="p-4 flex items-center justify-between hover:bg-gray-50 transition group">
-                      {/* Left Side: Icon & Name */}
                       <div className="flex items-center gap-3">
                         <div className="bg-red-50 p-2 rounded-lg"><FileText className="w-5 h-5 text-red-500" /></div>
                         <div>
@@ -174,21 +174,7 @@ export default function SubjectDetails() {
                           <p className="text-xs text-gray-500 uppercase">{file.fileType}</p>
                         </div>
                       </div>
-
-                      {/* Right Side: Actions */}
-                      <div className="flex items-center gap-4">
-                        {/* SUMMARIZE BUTTON */}
-                        <button 
-                          onClick={() => setSummaryFile(file)}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
-                        >
-                          Summarize
-                        </button>
-                        
-                        <a href={file.fileUrl} target="_blank" className="text-gray-400 hover:text-black transition">
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      </div>
+                      <a href={file.fileUrl} target="_blank" className="text-gray-400 hover:text-black transition"><ExternalLink className="w-4 h-4" /></a>
                     </div>
                   ))
                 )}
@@ -196,7 +182,7 @@ export default function SubjectDetails() {
             </div>
           </div>
         ) : (
-          /* --- TIMETABLE TAB --- */
+          /* TIMETABLE CONTENT */
           <div className="space-y-6">
             {timetableData.length === 0 ? (
               <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
@@ -244,23 +230,21 @@ export default function SubjectDetails() {
           </div>
         )}
 
-        {/* MODALS */}
+        {/* --- MODALS --- */}
         <GeneratePlanModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
+          isOpen={isPlanModalOpen} 
+          onClose={() => setIsPlanModalOpen(false)} 
           subjectName={subject.name}
           onGenerate={handleGeneratePlan}
           loading={generating}
         />
 
-        {/* SUMMARY MODAL (Logic: Open if summaryFile is not null) */}
-        {summaryFile && (
-          <SummaryModal
-            isOpen={!!summaryFile}
-            onClose={() => setSummaryFile(null)}
-            file={summaryFile}
-          />
-        )}
+        {/* Pass all materials to our new frontend-only modal */}
+        <SummaryModal
+          isOpen={isSummaryModalOpen}
+          onClose={() => setIsSummaryModalOpen(false)}
+          materials={subject.materials} 
+        />
         
       </main>
     </div>
